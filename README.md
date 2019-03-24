@@ -1,2 +1,2 @@
-# tareas-edd
-Tareas de estructuras de datos
+# tareas-so
+Tareas de Sistemas Operativos y Redes
