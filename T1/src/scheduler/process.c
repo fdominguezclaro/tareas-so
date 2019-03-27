@@ -7,9 +7,9 @@
 
 #include "process.h"
 
-//////////////////////////// Funciones privadas ///////////////////////////
+static enum states{READY, RUNNING, WAITING, FINISHED};
 
-static Process* process_init(int PID, int priority, int start_time, int length, char* name) {
+Process* process_init(int PID, int priority, int start_time, int length, char* name) {
     Process* process = malloc(sizeof(Process));
 
     process -> PID = PID;
@@ -23,6 +23,6 @@ static Process* process_init(int PID, int priority, int start_time, int length, 
     return process;
 }
 
-static void process_destroy(Process* process) {
+void process_destroy(Process* process) {
     free(process);
 }
