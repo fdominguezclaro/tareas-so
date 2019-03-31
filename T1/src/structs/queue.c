@@ -6,13 +6,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-// Importamos el archivo .h correspondiente
 #include "queue.h"
+#include "process.h"
 
 //////////////////////////// Funciones privadas ///////////////////////////
 
 /** Funcion que crea un nodo de la cola a partir de un valor */
-static Node* node_init(int value) {
+static Node* node_init(Process* process) {
     // Pido la memoria para el nodo
     Node* node = malloc(sizeof(Node));
 
@@ -21,7 +21,7 @@ static Node* node_init(int value) {
     node -> next = NULL;
 
     // Le doy el valor correspondiente
-    node -> value = value;
+    node -> process = process;
 
     // Retorno el nodo
     return node;
@@ -29,7 +29,7 @@ static Node* node_init(int value) {
 
 /** Funcion que libera recursivamente la memoria de la cola */
 static void nodes_destroy(Node* node) {
-    // Si el nodo no es NULL, qeama recursivamente al siguiente
+    // Si el nodo no es NULL, llama recursivamente al siguiente
     // y libero el nodo actual
     if (node)
     {
@@ -55,9 +55,9 @@ Queue* queue_init() {
 }
 
 /** Funcion que agrega un elemento al final de la cola */
-void queue_append(Queue* qe, int value) {
+void queue_append(Queue* qe, Process* process) {
     // Primero creo un nodo nuevo
-    Node* node = node_init(value);
+    Node* node = node_init(process);
 
     // Luego lo agrego a la cola
     if (!qe -> count)
@@ -80,7 +80,7 @@ void queue_append(Queue* qe, int value) {
 }
 
 /** Funcion que obtiene el valor de la cola en la posicion dada */
-int queue_get(Queue* qe, int position) {
+Process* queue_get(Queue* qe, int position) {
     // Si no hay suficientes nodos, hago un error
     if (position >= qe -> count)
     {
@@ -97,7 +97,7 @@ int queue_get(Queue* qe, int position) {
     }
 
     // Retoro el valor del nodo correspondiente
-    return actual -> value;
+    return actual -> process;
 }
 
 /** Funcion que destruye la cola liberando la memoria utilizada */

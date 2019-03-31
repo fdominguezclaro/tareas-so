@@ -36,14 +36,14 @@ CFLAGS=-Wunused -Wall $(OPT)
 # Matemáticas (C Math library)
 MTH=-lm
 
-LIB=$(MTH)
+LIB=
 
 ###############################################################################
 # MÓDULOS Y PROGRAMAS                                                         #
 ###############################################################################
 
 # Directorios con elementos de uso común
-COMMON=
+COMMON=structs utils
 
 # Directorios que serán compilados a un programa
 PROGRAMS=scheduler
