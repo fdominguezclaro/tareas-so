@@ -19,12 +19,26 @@ int main(int argc, char *argv[]) {
     int quantum;
     if (argc == 5) {
         sscanf(argv[4], "%i", &quantum);
-    } else {
+    } else if (argc == 4) {
         quantum = 3;
+    } else {
+        printf("Cantidad de argumentos incorrectos!\n");
+        exit(0);
     }
 
+    types type = 0; // Tipo de la simulacion
+    if (strcmp(argv[3], "np") == 0) {
+        type = np;
+    } else if (strcmp(argv[3], "p") == 0) {
+        type = np;
+    } else if (strcmp(argv[3], "fdom") == 0) {
+        type = fdom;
+    } else {
+        printf("Tipo de simulacion incorrecto!\n");
+        exit(0);
+    }
 
-    // if (strcmp(argv[3], "np") == 0)
+    printf("Tipo %s, quantum = %i\n", argv[3], quantum);
 
     // Inicializamos algunas variables
     int PID = 0;
@@ -100,7 +114,6 @@ int main(int argc, char *argv[]) {
             // Revisamos si empieza algun proceso
             if (processes[i] -> start_time  == time) {
                 queue_append(queue, processes[i]);
-                enqueued++;
                 // Ordeno los procesos segun prioridad
                 printf("[T: %i] Proceso %i READY, agregado a cola, burst inicial: %i\n", time, processes[i] -> PID,
                         processes[i] -> bursts[0]);
@@ -117,6 +130,8 @@ int main(int argc, char *argv[]) {
         int work_status; // 1 si termino burst, 2 si termino el proceso
         int entered; // 1 si ya maneje ese proceso
         Node* deleted;
+        enqueued = queue -> count;
+
         for (int i = 0; i < enqueued; i++) {
             entered = 0;
             work_status = -1;
@@ -154,7 +169,6 @@ int main(int argc, char *argv[]) {
                     set_state(actual -> process, FINISHED);
                     CPU_use = 0;
                     deleted = actual;
-                    enqueued -= 1;
                     finished++;
                     strcpy(actual_process, "");
                     actual -> process -> finish_time = time;
@@ -162,7 +176,7 @@ int main(int argc, char *argv[]) {
                 }
             }
 
-            if (actual -> process -> status == WAITING && !entered) {
+            else if (actual -> process -> status == WAITING && !entered) {
                 // Restamos una unidad de tiempo al burst
                 work_status = work(actual -> process);
                 if (work_status == 1) {
@@ -177,19 +191,19 @@ int main(int argc, char *argv[]) {
                 // Process p mode
             }
 
-            actual = actual -> next;
-
             // Elimino el nodo
             if (work_status == 2) {
                 // printf("%s\n", actual -> process -> name);
                 queue_remove(queue, deleted -> process -> PID);
             }
+
+            actual = actual -> next;
         }
 
         // Revisamos si termino la simulacion
         if (finished == n_proccess) {
             running = 0;
-            printf("Quedan %i en cola\n", queue -> count);
+            // printf("Quedan %i en cola\n", queue -> count);
         } else {
             print_queue_status(queue, actual_process);
         }
@@ -198,7 +212,7 @@ int main(int argc, char *argv[]) {
     }
 
     qsort(processes, n_proccess, sizeof(Process *), PID_compare);
-    write_statistics(processes, n_proccess);
+    write_statistics(processes, n_proccess, argv[2]);
 
     // Liberamos memoria
     free_processes(processes, n_proccess);

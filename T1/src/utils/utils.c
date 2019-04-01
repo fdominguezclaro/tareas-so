@@ -34,9 +34,9 @@ void print_processes(Process** processes, int n) {
     }
 }
 
-void write_statistics(Process** processes, int n) {
+void write_statistics(Process** processes, int n, char* name) {
     FILE* file;
-    file = fopen ("out.csv","w");
+    file = fopen (name, "w");
     for (int i=0; i<n; i++) {
         set_statistics(processes[i]);
         fprintf(file, "%s,%i,%i,%i,%i,%i\n", processes[i] -> name, processes[i] -> runs, processes[i] -> interruptions,
