@@ -121,16 +121,20 @@ int main(int argc, char *argv[]) {
             entered = 0;
             work_status = -1;
 
-            if (actual -> process -> status == READY && !CPU_use && CPU_used == 0) {
-                set_state(actual -> process, RUNNING);
-                if (actual -> process -> response_time == -1) {
-                    set_response_time(actual -> process, time);
+            if (actual -> process -> status == READY) {
+                if (!CPU_use && CPU_used == 0) {
+                    set_state(actual -> process, RUNNING);
+                    if (actual -> process -> response_time == -1) {
+                        set_response_time(actual -> process, time);
+                    }
+                    CPU_use = 1;
+                    CPU_used = 1;
+                    entered = 1;
+                    actual -> process -> runs += 1;
+                    strcpy(actual_process, actual -> process -> name);
+                } else {
+                    increment_waiting_time(actual -> process);
                 }
-                CPU_use = 1;
-                CPU_used = 1;
-                entered = 1;
-                actual -> process -> runs += 1;
-                strcpy(actual_process, actual -> process -> name);
             }
 
             if (actual -> process -> status == RUNNING) {
@@ -194,10 +198,7 @@ int main(int argc, char *argv[]) {
     write_statistics(processes, n_proccess);
 
     // Liberamos memoria
-    for (int i = 0; i < n_proccess; i++) {
-        free(processes[i]);
-    }
-    free(processes);
+    free_processes(, processesn_proccess);
     free(queue);
 
     return 0;

@@ -17,3 +17,5 @@ void write_statistics(Process** processes, int n);
 void print_queue_status(Queue* queue, char* actual_process);
 
 void set_statistics(Process* process);
+
+void free_processes(Process** processes, int n);

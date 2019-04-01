@@ -60,3 +60,11 @@ void print_queue_status(Queue* queue, char* actual_process) {
 void set_statistics(Process* process) {
     process -> turnaround_time = process -> finish_time - process -> start_time;
 }
+
+void free_processes(Process** processes, int n) {
+    for (int i = 0; i < n_proccess; i++) {
+        free(processes[i] -> bursts);
+        free(processes[i]);
+    }
+    free(processes);
+}
