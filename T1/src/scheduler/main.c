@@ -198,7 +198,7 @@ int main(int argc, char *argv[]) {
     write_statistics(processes, n_proccess);
 
     // Liberamos memoria
-    free_processes(, processesn_proccess);
+    free_processes(processes, n_proccess);
     free(queue);
 
     return 0;
