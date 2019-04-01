@@ -3,6 +3,7 @@
 //
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "utils.h"
 #include "../structs/process.h"
@@ -62,7 +63,7 @@ void set_statistics(Process* process) {
 }
 
 void free_processes(Process** processes, int n) {
-    for (int i = 0; i < n_proccess; i++) {
+    for (int i = 0; i < n; i++) {
         free(processes[i] -> bursts);
         free(processes[i]);
     }
