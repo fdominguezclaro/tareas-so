@@ -187,6 +187,7 @@ int main(int argc, char *argv[]) {
         // Revisamos si termino la simulacion
         if (finished == n_proccess) {
             running = 0;
+            printf("Quedan %i en cola\n", queue -> count);
         } else {
             print_queue_status(queue, actual_process);
         }

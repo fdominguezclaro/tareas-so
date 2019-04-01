@@ -122,6 +122,7 @@ void queue_append(Queue* qe, Process* process) {
 
 void queue_remove(Queue* qe, int PID) {
     if (qe -> count == 1) {
+        free(qe -> start);
         qe -> start = NULL;
     } else {
         Node* actual = qe -> start;
