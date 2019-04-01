@@ -41,3 +41,5 @@ Process* queue_get(Queue* qe, int position);
 
 /** Funcion que destruye la cola liberando la memoria utilizada */
 void queue_destroy(Queue* qe);
+
+void queue_remove(Queue* qe, int PID);

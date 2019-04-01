@@ -6,7 +6,6 @@
 
 typedef enum
 {
-    NOINIT,
     READY,
     RUNNING,
     WAITING,
@@ -23,15 +22,20 @@ typedef struct process {
     int actual_burst;
     states status;
     char name[257];
+    int runs;
+    int interruptions;
+    int turnaround_time;
+    int response_time;
+    int waiting_time;
 } Process;
 
 
 Process* process_init(int PID, int priority, int start_time, int length, int* bursts, char* name);
 
-void ready_process(Process* process);
+int work(Process* process);
 
-void run_process(Process* process);
+void set_state(Process* process, states state);
 
-void pause_process(Process* process);
+void set_response_time(Process* process, int time);
 
-void stop_process(Process* process);
+void increment_waiting_time(Process* process);
