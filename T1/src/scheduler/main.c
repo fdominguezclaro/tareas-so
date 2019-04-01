@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
     char actual_process[257];
 
     while(running) {
-        CPU_use = 0;
+        CPU_used = 0;
         printf("\n[T: %i] inicio de iteracion. \n", time);
 
         for (int i = 0; i < n_proccess; i++) {
@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
             work_status = -1;
 
             if (actual -> process -> status == READY) {
-                if (!CPU_use && CPU_used == 0) {
+                if (!CPU_use && !CPU_used) {
                     set_state(actual -> process, RUNNING);
                     if (actual -> process -> response_time == -1) {
                         set_response_time(actual -> process, time);
@@ -146,18 +146,19 @@ int main(int argc, char *argv[]) {
                 // Termina el burst
                 if (work_status == 1) {
                     set_state(actual -> process, WAITING);
-                    CPU_used = 0;
+                    CPU_use = 0;
+                    strcpy(actual_process, "");
                 }
                 // Termina el proceso
                 if (work_status == 2) {
                     set_state(actual -> process, FINISHED);
-                    CPU_used = 0;
+                    CPU_use = 0;
                     deleted = actual;
                     enqueued -= 1;
                     finished++;
                     strcpy(actual_process, "");
                     actual -> process -> finish_time = time;
-                    printf("Finish time: %i\n", actual -> process -> finish_time);
+                    printf("%s: Finish time: %i\n", actual -> process -> name, actual -> process -> finish_time);
                 }
             }
 
@@ -180,6 +181,7 @@ int main(int argc, char *argv[]) {
 
             // Elimino el nodo
             if (work_status == 2) {
+                // printf("%s\n", actual -> process -> name);
                 queue_remove(queue, deleted -> process -> PID);
             }
         }

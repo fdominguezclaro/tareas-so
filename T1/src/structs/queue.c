@@ -129,9 +129,23 @@ void queue_remove(Queue* qe, int PID) {
         Node* previous = actual; // Para el ultimo caso
         for (int i = 0; i < qe -> count; i++) {
             if (actual -> process -> PID == PID) {
-                previous -> next = actual -> next;
+                if (i == 0) {
+                    qe -> start = actual -> next;
+                    qe -> count -= 1;
+                    free(actual);
+                    return;
+                }
+                if (actual -> next) {
+                    printf("%s Eliminado\n", actual -> process -> name);
+                    previous -> next = actual -> next;
+                } else {
+                    printf("%s Eliminado 2.0\n", actual -> process -> name);
+                    previous -> next = NULL;
+                }
+
                 qe -> count -= 1;
                 free(actual);
+                return;
             } else {
                 previous = actual;
                 actual = actual -> next;

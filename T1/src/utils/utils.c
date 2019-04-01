@@ -51,15 +51,16 @@ void print_queue_status(Queue* queue, char* actual_process) {
     Node* actual = queue -> start;
     for (int i = 0; i < queue -> count; i++) {
         // printf("DEBUGGER\n");
-        printf("%s: estado: %i, burst actual: %i, remaining: %i, priority:%i\n", actual -> process -> name,
+        printf("%s: estado: %i, burst actual: %i, remaining: %i, priority:%i, waiting: %i\n", actual -> process -> name,
                 actual -> process -> status, actual -> process -> actual_burst,
-                actual -> process -> bursts[actual -> process -> actual_burst], actual -> process -> priority);
+                actual -> process -> bursts[actual -> process -> actual_burst], actual -> process -> priority,
+                actual -> process -> waiting_time);
         actual = actual -> next;
     }
 }
 
 void set_statistics(Process* process) {
-    process -> turnaround_time = process -> finish_time - process -> start_time;
+    process -> turnaround_time = process -> finish_time - process -> start_time + 1;
 }
 
 void free_processes(Process** processes, int n) {

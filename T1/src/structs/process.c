@@ -24,7 +24,7 @@ Process* process_init(int PID, int priority, int start_time, int length, int* bu
     process -> interruptions = 0; // Cantidad de veces que fue interrumpido
     process -> turnaround_time = -1;
     process -> response_time = -1;
-    process -> waiting_time = -1;
+    process -> waiting_time = 0;
     strcpy(process -> name, name);
 
     return process;
@@ -37,7 +37,7 @@ void process_destroy(Process* process) {
 int work(Process* process) {
     process -> bursts[process -> actual_burst] -= 1;
 
-    if (process -> actual_burst == 2 * process -> length - 2) {
+    if (process -> actual_burst == 2 * process -> length - 2 && process -> bursts[process -> actual_burst] == 0) {
         return 2;
     }
 
