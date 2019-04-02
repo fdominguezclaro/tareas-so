@@ -26,15 +26,15 @@ int main(int argc, char *argv[]) {
         exit(0);
     }
 
-    types type = 0; // Tipo de la simulacion
+    int type = 0; // Tipo de la simulacion
     if (strcmp(argv[3], "np") == 0) {
         type = 0;
     } else if (strcmp(argv[3], "p") == 0) {
         type = 1;
-    } else if (strcmp(argv[3], "fdom") == 0) {
+    } else if (strcmp(argv[3], "boost") == 0) {
         type = 2;
     } else {
-        printf("Tipo de simulacion incorrecto!\n");
+        printf("Tipo de simulacion incorrecto! Puede ser p, np o boost\n");
         exit(0);
     }
 
@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
     // Inicializamos algunas variables
     int PID = 0;
     int time = 0; // Reloj
-    int size = 40; // Seteo inicialmente en 40 la cantidad de procesos soportada
+    int size = 1; // Seteo inicialmente en 40 la cantidad de procesos soportada
     int running = 1; // Estado de la simulacion
     int CPU_use = 0; // Estado de CPU
     int CPU_used = 0; // 1 si fue ocupada en la iteracion
@@ -74,6 +74,10 @@ int main(int argc, char *argv[]) {
 
     // El while fue una modificacion obtenida de: https://overiq.com/c-programming-101/fscanf-function-in-c/
     while( fscanf(fp, "%s %i %i %i", name, &priority, &start_time, &length) == 4 ) {
+        if (n_proccess == size) {
+            size *= 2;
+            processes = (Process**)realloc(processes, sizeof(Process*) * size);
+        }
         // Creo un array con las rafagas
         int* bursts = malloc(sizeof(int) * (length * 2 - 1));
         // Leo las rafagas del proceso
@@ -82,6 +86,9 @@ int main(int argc, char *argv[]) {
         }
 
         Process* process = process_init(PID, priority, start_time, length, bursts, name);
+        if (type == 2) {
+            process -> priority = 1000;
+        }
         processes[PID] = process;
         n_proccess++;
         PID++;
@@ -141,6 +148,9 @@ int main(int argc, char *argv[]) {
                     set_state(actual -> process, RUNNING);
                     if (actual -> process -> response_time == -1) {
                         set_response_time(actual -> process, time);
+                        if (type == 2) {
+                            actual -> process -> priority = actual -> process -> initial_priority;
+                        }
                     }
                     CPU_use = 1;
                     CPU_used = 1;

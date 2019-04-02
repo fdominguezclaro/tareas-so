@@ -14,6 +14,7 @@ Process* process_init(int PID, int priority, int start_time, int length, int* bu
 
     process -> PID = PID;
     process -> priority = priority;
+    process -> initial_priority = priority;
     process -> start_time = start_time; // Comienzo de ejecucion
     process -> length = length; // Cantidad de bursts
     process -> bursts = bursts; // Lista de bursts

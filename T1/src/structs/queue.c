@@ -68,6 +68,7 @@ void queue_append(Queue* qe, Process* process) {
         Node* previous = actual; // Para el ultimo caso
         int inserted = 0;
         for (int i = 0; i < qe -> count; i++) {
+            printf("iteration \n");
             if (actual -> process -> priority > process -> priority) {
                 // Sigo buscando
                 previous = actual;
@@ -91,24 +92,49 @@ void queue_append(Queue* qe, Process* process) {
             }
             if (actual -> process -> priority == process -> priority) {
                 // Ordeno segun PID
+                printf("Misma prioridad \n");
+                printf("Nodo, %s \n", actual ->process->name);
                 int sorting = 1;
                 while (sorting) {
                     if (actual -> process -> PID < process -> PID) {
+                        if (i == 0) {
+                            printf("Nodo insertado al principio \n");
+                            node -> next = qe -> start;
+                            qe -> start = node;
+                        }
                         // Lo agrego en esta posicion
-                        previous -> next = node;
-                        node -> next = actual;
+//                        previous -> next = node;
+//                        node -> next = actual;
+                        else {
+                            printf("Nodo insertado en el anterior \n");
+                            previous -> next = node;
+                            node -> next = actual;
+                        }
                         sorting = 0;
+                        inserted = 1;
+                        break;
                     }
 
                     // Sigo buscando la posicion segun PID
                     previous = actual;
                     actual = actual -> next;
+                    if (actual == NULL) {
+                        sorting = 0;
+                    }
+                    printf("FIN \n");
                 }
-
-                break;
+                if (!inserted){
+                    printf("Ultimo lugar1!\n");
+                    // En caso que insertamos de ultimo lugar
+                    previous -> next = node;
+                    // printf("Nodo insertado en ultimo \n");
+                    inserted = 1;
+                    break;
+                }
             }
         }
         if (!inserted){
+            printf("Ultimo lugar!\n");
             // En caso que insertamos de ultimo lugar
             actual -> next = node;
             // printf("Nodo insertado en ultimo \n");

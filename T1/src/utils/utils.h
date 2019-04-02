@@ -5,12 +5,6 @@
 #include "../structs/process.h"
 #include "../structs/queue.h"
 
-typedef enum
-{
-    np,
-    p,
-    fdom
-} types;
 
 int time_compare(const void *pointer1, const void *pointer2);
 

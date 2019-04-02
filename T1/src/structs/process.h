@@ -15,6 +15,7 @@ typedef enum
 typedef struct process {
     int PID;
     int priority;
+    int initial_priority;
     int start_time;
     int finish_time;
     int length;
