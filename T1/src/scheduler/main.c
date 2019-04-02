@@ -206,7 +206,8 @@ int main(int argc, char *argv[]) {
                 queue_remove(queue, deleted -> process -> PID);
             }
 
-            if (i < queue -> count && enqueued > 1) {
+            // Solucion fea para evitar errores en valgrind
+            if (i < queue -> count && enqueued > 1 && finished < n_proccess) {
                 actual = actual -> next;
             }
         }
