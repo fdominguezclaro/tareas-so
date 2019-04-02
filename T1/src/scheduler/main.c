@@ -206,7 +206,9 @@ int main(int argc, char *argv[]) {
                 queue_remove(queue, deleted -> process -> PID);
             }
 
-            actual = actual -> next;
+            if (actual -> next) {
+                actual = actual -> next;
+            }
         }
 
         // Revisamos si termino la simulacion
