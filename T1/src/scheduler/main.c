@@ -206,7 +206,7 @@ int main(int argc, char *argv[]) {
                 queue_remove(queue, deleted -> process -> PID);
             }
 
-            if (i < enqueued) {
+            if (i < enqueued - 1) {
                 actual = actual -> next;
             }
         }
