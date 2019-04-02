@@ -61,3 +61,7 @@ void set_response_time(Process* process, int time) {
 void increment_waiting_time(Process* process) {
     process -> waiting_time += 1;
 }
+
+void interrupt(Process* process) {
+    process -> interruptions += 1;
+}

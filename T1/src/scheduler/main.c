@@ -28,11 +28,11 @@ int main(int argc, char *argv[]) {
 
     types type = 0; // Tipo de la simulacion
     if (strcmp(argv[3], "np") == 0) {
-        type = np;
+        type = 0;
     } else if (strcmp(argv[3], "p") == 0) {
-        type = np;
+        type = 1;
     } else if (strcmp(argv[3], "fdom") == 0) {
-        type = fdom;
+        type = 2;
     } else {
         printf("Tipo de simulacion incorrecto!\n");
         exit(0);
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
     int enqueued = 0; // Si hay procesos en la cola
     int n_proccess = 0; // Cantidad de procesos
     int initialized = 0; // Procesos iniciados
-    int q_remaining = 0; // Quantum restante para el proceso
+    int q_remaining = quantum; // Quantum restante para el proceso
 
     Process** processes = malloc(sizeof(Process*) * size);
 
@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
 
     while(running) {
         CPU_used = 0;
-        printf("\n[T: %i] inicio de iteracion. \n", time);
+        printf("\n[T: %i] inicio de iteracion, Q = %i \n", time, q_remaining);
 
         for (int i = 0; i < n_proccess; i++) {
             // Revisamos si empieza algun proceso
@@ -153,27 +153,41 @@ int main(int argc, char *argv[]) {
             }
 
             if (actual -> process -> status == RUNNING) {
-                // Restamos una unidad de tiempo al burst
-                work_status = work(actual -> process);
-                CPU_used = 1;
-                entered = 1;
+                    if (type != 0) {
+                        q_remaining -= 1;
+                    }
+                    if (!q_remaining) {
+                        printf("%s: Proceso interruptido\n", actual -> process -> name);
+                        set_state(actual -> process, READY);
+                        interrupt(actual -> process);
+                        q_remaining = quantum;
+                        CPU_use = 0;
+                        strcpy(actual_process, "");
+                    }
 
-                // Termina el burst
-                if (work_status == 1) {
-                    set_state(actual -> process, WAITING);
-                    CPU_use = 0;
-                    strcpy(actual_process, "");
-                }
-                // Termina el proceso
-                if (work_status == 2) {
-                    set_state(actual -> process, FINISHED);
-                    CPU_use = 0;
-                    deleted = actual;
-                    finished++;
-                    strcpy(actual_process, "");
-                    actual -> process -> finish_time = time;
-                    printf("%s: Finish time: %i\n", actual -> process -> name, actual -> process -> finish_time);
-                }
+                    // Restamos una unidad de tiempo al burst
+                    work_status = work(actual -> process);
+                    CPU_used = 1;
+                    entered = 1;
+
+                    // Termina el burst
+                    if (work_status == 1) {
+                        set_state(actual -> process, WAITING);
+                        CPU_use = 0;
+                        strcpy(actual_process, "");
+                        q_remaining = quantum;
+                    }
+                    // Termina el proceso
+                    if (work_status == 2) {
+                        set_state(actual -> process, FINISHED);
+                        CPU_use = 0;
+                        deleted = actual;
+                        finished++;
+                        strcpy(actual_process, "");
+                        actual -> process -> finish_time = time;
+                        printf("%s: Finish time: %i\n", actual -> process -> name, actual -> process -> finish_time);
+                        q_remaining = quantum;
+                    }
             }
 
             else if (actual -> process -> status == WAITING && !entered) {
@@ -184,11 +198,6 @@ int main(int argc, char *argv[]) {
                 }
                 entered = 1;
                 increment_waiting_time(actual -> process);
-            }
-
-            if (q_remaining == quantum - 1) {
-                q_remaining = quantum;
-                // Process p mode
             }
 
             // Elimino el nodo

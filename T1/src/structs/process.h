@@ -39,3 +39,5 @@ void set_state(Process* process, states state);
 void set_response_time(Process* process, int time);
 
 void increment_waiting_time(Process* process);
+
+void interrupt(Process* process);
