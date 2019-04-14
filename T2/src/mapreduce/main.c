@@ -2,13 +2,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
+#include <unistd.h>
+
 
 #include "../utils/utils.h"
 #include "../utils/map.h"
 #include "../utils/reduce.h"
 
+
 // Obtenido de https://stackoverflow.com/questions/4217037/catch-ctrl-c-in-c
 static volatile sig_atomic_t keep_running = 1;
+volatile int running_threads;
+pthread_mutex_t running_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void sig_handler(int _) {
     (void)_;
@@ -35,6 +41,8 @@ int main(int argc, char *argv[]) {
     int version = 0;
     if (strcmp(argv[3], "threads") == 0) {
         version = 0;
+        // Llevo la cuenta de los threads creados
+        running_threads = 0;
     } else if (strcmp(argv[3], "fork") == 0) {
         version = 1;
     } else {
@@ -74,6 +82,8 @@ int main(int argc, char *argv[]) {
             } else if(ch == '\n') {
                 continue;
             }
+
+            ch = tolower(ch);
             array[chunk_count][j++] = ch;
 
             // Si no queda espacio, hago map sobre el chunk y empiezo otro
@@ -81,11 +91,11 @@ int main(int argc, char *argv[]) {
                 if (!version) {
                     puts("Version thread");
                     puts("Main creating a thread");
-                    pthread_t mapper_thread = init_mapper_thread(array, chunk_count);
-                    pthread_join(mapper_thread, NULL);
+                    init_mapper_thread(array, chunk_count);
                 } else {
                     puts("Version fork");
                 }
+
                 j = 0;
                 chunk_count = 0;
             }
@@ -94,8 +104,13 @@ int main(int argc, char *argv[]) {
         // Proceso el ultimo chunk
         if (!version) {
             puts("Main creating the last thread");
-            pthread_t mapper_thread = init_mapper_thread(array, chunk_count);
-            pthread_join(mapper_thread, NULL);
+            init_mapper_thread(array, chunk_count);
+            // Espero a que terminen todos los threads
+            while (running_threads > 0) {
+                sleep(1);
+            }
+
+            puts("All threads finished!");
         } else {
             puts("Version fork");
         }

@@ -9,6 +9,9 @@
 #include "map.h"
 #include "reduce.h"
 
+extern volatile int running_threads;
+extern pthread_mutex_t running_mutex;
+
 char** create_array(int BUFFER_SIZE, int WORD_SIZE) {
     char** array = malloc(sizeof(char*) * BUFFER_SIZE);
 
@@ -41,6 +44,10 @@ pthread_t init_mapper_thread(char** array, int array_length) {
     pthread_t mapper_thread;
     puts("--- Creando thread ---");
     void* args = args_init(array, array_length);
+    // Sumo el thread al ounter
+    pthread_mutex_lock(&running_mutex);
+    running_threads++;
+    pthread_mutex_unlock(&running_mutex);
     pthread_create(&mapper_thread, NULL, mapper, args);
     return mapper_thread;
 }
@@ -48,3 +55,4 @@ pthread_t init_mapper_thread(char** array, int array_length) {
 void create_process(int* array, int array_length) {
 
 }
+
