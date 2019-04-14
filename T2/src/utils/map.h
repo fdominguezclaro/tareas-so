@@ -10,4 +10,4 @@
 
 #include "utils.h"
 
-void mapper(void*);
+void* mapper(void* args);

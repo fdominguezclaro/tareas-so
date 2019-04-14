@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
         char** array = create_array(BUFFER_SIZE, WORD_SIZE);
         int j = 0;
 
-        while((ch = fgetc(f)) && (ch != EOF)) {
+        while((ch = fgetc(f)) && (ch != EOF) && keep_running) {
             if(ch == ' ') {
                 array[chunk_count++][j] = '\0';
                 j = 0;
@@ -74,19 +74,34 @@ int main(int argc, char *argv[]) {
             } else if(ch == '\n') {
                 continue;
             }
-
             array[chunk_count][j++] = ch;
 
             // Si no queda espacio, hago map sobre el chunk y empiezo otro
-            if (chunk_count == BUFFER_SIZE) {
+            if (chunk_count == BUFFER_SIZE - 1) {
+                if (!version) {
+                    puts("Version thread");
+                    puts("Main creating a thread");
+                    pthread_t mapper_thread = init_mapper_thread(array, chunk_count);
+                    pthread_join(mapper_thread, NULL);
+                } else {
+                    puts("Version fork");
+                }
                 j = 0;
                 chunk_count = 0;
-                break;
             }
         }
 
+        // Proceso el ultimo chunk
+        if (!version) {
+            puts("Main creating the last thread");
+            pthread_t mapper_thread = init_mapper_thread(array, chunk_count);
+            pthread_join(mapper_thread, NULL);
+        } else {
+            puts("Version fork");
+        }
+
         for(int k = 0; k < chunk_count; k++) {
-            printf("%s\n", array[k]);
+            // printf("%s\n", array[k]);
             free(array[k]);
         }
 
@@ -94,13 +109,6 @@ int main(int argc, char *argv[]) {
 
         // Cerrar archivo
         fclose(f);
-
-        if (!version) {
-            puts("Version thread");
-
-        } else {
-            puts("Version fork");
-        }
 
         return 0;
 

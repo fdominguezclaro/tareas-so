@@ -6,6 +6,11 @@
 
 #include "map.h"
 
-void mapper(void* args) {
-    puts("I'm a thread");
+
+void* mapper(void* args) {
+    Args* data = args;
+    puts("I'm a thread, and my words are:");
+    print_array(data -> array, data -> array_length);
+    args_destroy(args);
+    pthread_exit (NULL);
 }
