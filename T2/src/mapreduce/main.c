@@ -16,7 +16,7 @@
 static volatile sig_atomic_t keep_running = 1;
 volatile int running_threads;
 pthread_mutex_t running_mutex = PTHREAD_MUTEX_INITIALIZER;
-hashtable ** hastables_list;
+hashtable ** volatile hastables_list;
 volatile int hashes_index;
 
 static void sig_handler(int _) {

@@ -10,12 +10,12 @@
 
 extern volatile int running_threads;
 extern pthread_mutex_t running_mutex;
-hashtable ** hastables_list;
+extern hashtable **  volatile hastables_list;
 extern volatile int hashes_index;
 
 
 void* mapper(void* args) {
-    hashtable *hash = createtable(50000);
+    hashtable* hash = createtable(50000);
     struct node *node = NULL;
 
     Args* data = args;
@@ -30,10 +30,10 @@ void* mapper(void* args) {
 
     // Elimino el thread del contador usando lock y guardo su hastable
     pthread_mutex_lock(&running_mutex);
+    hastables_list[hashes_index] = hash;
     hashes_index++;
     printf("threads: %i, hashes: %i \n", running_threads, hashes_index);
     running_threads--;
-    hastables_list[hashes_index] = hash;
     pthread_mutex_unlock(&running_mutex);
 
     puts("I'm done!");

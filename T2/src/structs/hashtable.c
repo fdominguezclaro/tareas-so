@@ -164,7 +164,6 @@ void freenode(struct node *node) {
 void freetable(hashtable *h) {
     struct node *current = NULL;
     int i;
-    printf("%i", h -> tablesize);
 
     for(i = 0; i < h -> tablesize; i++) {
         current = h -> table[i];
