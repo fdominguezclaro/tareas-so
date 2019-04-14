@@ -9,12 +9,15 @@
 #include "../utils/utils.h"
 #include "../utils/map.h"
 #include "../utils/reduce.h"
+#include "../structs/hashtable.h"
 
 
 // Obtenido de https://stackoverflow.com/questions/4217037/catch-ctrl-c-in-c
 static volatile sig_atomic_t keep_running = 1;
 volatile int running_threads;
 pthread_mutex_t running_mutex = PTHREAD_MUTEX_INITIALIZER;
+hashtable ** hastables_list;
+volatile int hashes_index;
 
 static void sig_handler(int _) {
     (void)_;
@@ -40,10 +43,15 @@ int main(int argc, char *argv[]) {
     // Tipo de la simulacion
     int version = 0;
     if (strcmp(argv[3], "threads") == 0) {
+        puts("Version thread");
         version = 0;
         // Llevo la cuenta de los threads creados
         running_threads = 0;
+        // Lista de hastables
+        hastables_list = malloc(sizeof(hashtable *) * 1);
+
     } else if (strcmp(argv[3], "fork") == 0) {
+        puts("Version fork");
         version = 1;
     } else {
         puts("Tipo de simulacion incorrecto! Puede ser threads o fork");
@@ -51,7 +59,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Seteamos algunas variables globales
-    int BUFFER_SIZE = 8192;
+    int BUFFER_SIZE = 2048;
     // assumes no word exceeds length of 45
     int WORD_SIZE = 45;
     int chunk_count = 0;
@@ -89,8 +97,7 @@ int main(int argc, char *argv[]) {
             // Si no queda espacio, hago map sobre el chunk y empiezo otro
             if (chunk_count == BUFFER_SIZE - 1) {
                 if (!version) {
-                    puts("Version thread");
-                    puts("Main creating a thread");
+                    hastables_list = (hashtable**)realloc(hastables_list, sizeof(hashtable*) * chunk_count);
                     init_mapper_thread(array, chunk_count);
                 } else {
                     puts("Version fork");
@@ -100,6 +107,9 @@ int main(int argc, char *argv[]) {
                 chunk_count = 0;
             }
         }
+
+        // Cerrar archivo
+        fclose(f);
 
         // Proceso el ultimo chunk
         if (!version) {
@@ -112,18 +122,15 @@ int main(int argc, char *argv[]) {
 
             puts("All threads finished!");
         } else {
-            puts("Version fork");
         }
 
-        for(int k = 0; k < chunk_count; k++) {
+        // Free allocated memory
+        for(int k = 0; k < hashes_index; k++) {
             // printf("%s\n", array[k]);
-            free(array[k]);
+            freetable(hastables_list[k]);
         }
 
-        free(array);
-
-        // Cerrar archivo
-        fclose(f);
+        free(hastables_list);
 
         return 0;
 

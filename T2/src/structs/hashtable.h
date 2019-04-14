@@ -63,7 +63,7 @@ void deletenode(hashtable *, char *);
  * @param hashtable *, pointer to struct containing the hash table.
  * @param int, minimum frequency value.
  */
-void mostfrequent(hashtable *, int);
+void frequencies(hashtable *);
 
 /**
  * Initializes a new hash table. Allocates memory for an array.

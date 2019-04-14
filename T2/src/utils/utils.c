@@ -42,7 +42,7 @@ void print_array(char** array, int array_length) {
 
 pthread_t init_mapper_thread(char** array, int array_length) {
     pthread_t mapper_thread;
-    puts("--- Creando thread ---");
+    puts("\n--- Creando thread ---");
     void* args = args_init(array, array_length);
     // Sumo el thread al ounter
     pthread_mutex_lock(&running_mutex);

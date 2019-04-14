@@ -99,17 +99,16 @@ void deletenode(hashtable *h, char *key) {
 }
 
 /* Prints values that have a value higher than the integer parameter */
-void mostfrequent(hashtable *h, int freq) {
+void frequencies(hashtable *h) {
     struct node *current = NULL;
     int i;
     printf("\n  Word       Frequency\n");
     printf("  --------------------\n");
-    for(i = 0; i < h->tablesize; i++) {
-        current = h->table[i];
+    for(i = 0; i < h -> tablesize; i++) {
+        current = h -> table[i];
         while(current != NULL) {
-            if(current->frequency > freq)
-                printf("  %-14s %d\n", current->key, current->frequency);
-            current = current->next;
+            printf("  %-14s %d\n", current -> key, current -> frequency);
+            current = current -> next;
         }
     }
 }
@@ -130,15 +129,15 @@ struct hashtable * createtable(int size) {
     if(size < 1)
         return NULL;
     hashtable *table = (hashtable *) malloc(sizeof(hashtable));
-    table->table = (struct node **) malloc(sizeof(struct node *) * size);
+    table -> table = (struct node **) malloc(sizeof(struct node *) * size);
 
     if(table != NULL) {
-        table->currentsize = 0;
-        table->tablesize = size;
+        table -> currentsize = 0;
+        table -> tablesize = size;
     }
     /* Set all pointers to NULL */
     for(i = 0; i < size; i++)
-        table->table[i] = NULL;
+        table -> table[i] = NULL;
     return table;
 }
 
@@ -147,9 +146,9 @@ struct node * nalloc(char *key, int freq) {
     struct node *p = (struct node *) malloc(sizeof(struct node));
 
     if(p != NULL) {
-        p->key = strdup(key);
-        p->frequency = freq;
-        p->next = NULL;
+        p -> key = strdup(key);
+        p -> frequency = freq;
+        p -> next = NULL;
     }
     return p;
 }
@@ -157,7 +156,7 @@ struct node * nalloc(char *key, int freq) {
 /* Deallocates memory of the string stored in the node and the
    node itself */
 void freenode(struct node *node) {
-    free(node->key);
+    free(node -> key);
     free(node);
 }
 
@@ -165,20 +164,21 @@ void freenode(struct node *node) {
 void freetable(hashtable *h) {
     struct node *current = NULL;
     int i;
+    printf("%i", h -> tablesize);
 
-    for(i = 0; i < h->tablesize; i++) {
-        current = h->table[i];
+    for(i = 0; i < h -> tablesize; i++) {
+        current = h -> table[i];
         if(current == NULL)
             continue;
         /* Deallocate memory of every node in the table */
-        while(current->next != NULL) {
-            h->table[i] = h->table[i]->next ;
+        while(current -> next != NULL) {
+            h -> table[i] = h -> table[i] -> next ;
             freenode(current);
-            current = h->table[i];
+            current = h -> table[i];
         }
         freenode(current);
     }
     /* Free the hash table */
-    free(h->table);
+    free(h -> table);
     free(h);
 }
