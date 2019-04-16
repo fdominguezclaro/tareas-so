@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "map.h"
 #include "../structs/hashtable.h"
@@ -28,10 +29,12 @@ void* mapper(void* args) {
 
     LinkedList* ll = ll_init();
 
+    char word[45];
     // Creo un hastable con la frecuencia de cada key
     // Creo una ll con cada key y un contador
     for(int i = 0; i < data -> array_length; i++) {
-        ll_append(ll, data -> array[i], 1);
+        strcpy(word, data -> array[i]);
+        ll_append(ll, word, 1);
 
         //node = add(hash, data -> array[i], 0);
         //node -> count++;
