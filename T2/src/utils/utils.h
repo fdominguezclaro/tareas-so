@@ -11,17 +11,28 @@
 
 #include <pthread.h>
 
+#include "../structs/hashtable.h"
+#include "../structs/linked_list.h"
+
 
 typedef struct arg_struct {
     char** array;
     int array_length;
 } Args;
 
+typedef struct reducer_arg_struct {
+    LinkedList ** array;
+    int ll_count;
+} ReducerArgs;
+
 // Crea un array de strings
 char** create_array(int BUFFER_SIZE, int WORD_SIZE);
 
-// Inicializa la estructura para pasarle argumentos a un thread o proceso
+// Inicializa la estructura para pasarle argumentos a un thread o proceso mapper
 void* args_init(char** array, int array_length);
+
+// Inicializa la estructura para pasarle argumentos a un thread o proceso reducer
+void* reducer_args_init(LinkedList ** array, int hashes_count);
 
 // Destruye la estructura
 void args_destroy(Args* args);
@@ -29,8 +40,11 @@ void args_destroy(Args* args);
 // Imprime la lista de palabras
 void print_array(char** array, int array_length);
 
-// Crea un thread
+// Crea un mapper thread
 pthread_t init_mapper_thread(char**, int array_length);
+
+// Crea un reducer thread
+pthread_t init_reducer_thread(LinkedList ** hastables_list, int hashes_count);
 
 // Crea un proceso
 void create_process(int* array, int array_length);

@@ -5,12 +5,15 @@
 */
 #ifndef HASHTABLE_H_INCLUDED
 #define HASHTABLE_H_INCLUDED
+
+#pragma once
+
 #include <stdbool.h>
 
 /* Node to get stored in the hash table */
 struct node {
     char *key;
-    int frequency;
+    int count;
     struct node *next;
 };
 
@@ -31,6 +34,12 @@ typedef struct hashtable hashtable;
  * in the table, return the node containing that key.
  */
 struct node * add(hashtable *, char *, int);
+
+/**
+ * Deallocates the memory of a node.
+ * @param struct node *, the node to be deallocated.
+ */
+void freenode(struct node *);
 
 /**
  * Checks is a key value is stored in the table.
