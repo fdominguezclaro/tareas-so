@@ -6,14 +6,14 @@
 
 #include "linked_list.h"
 
-
 ////// Funciones privadas ///////
 
 /** Crea un nodo a partir de un valor */
 static Node* node_init(char* key, int count) {
     Node* node = malloc(sizeof(Node));
 
-    node -> key = key;
+    node -> key = malloc(strlen(key) + 1);
+    strcpy(node -> key, key);
     node -> count = count;
 
     node -> next = NULL;
@@ -52,10 +52,16 @@ static void ll_add_node(LinkedList* ll, Node* node)
 }
 
 /** Hace partition de ll y separa los datos en las otras listas */
-static void partition(LinkedList* ll, LinkedList* smallers, LinkedList* equals, LinkedList* biggers)
-{
+static void partition(LinkedList* ll, LinkedList* smallers, LinkedList* equals, LinkedList* biggers, int type) {
     // Selecciono el pivote como el primer elemento de la lista
-    int piv = ll -> head -> count;
+    int piv;
+    char* spiv = NULL;
+
+    if (!type) {
+        piv = ll -> head -> count;
+    } else {
+        spiv = ll -> head -> key;
+    }
 
     // Itero sobre la lista ll moviendo los nodos a la lista que corresponde
     Node* actual = ll -> head;
@@ -67,10 +73,18 @@ static void partition(LinkedList* ll, LinkedList* smallers, LinkedList* equals, 
         // Desconecto el nodo actual de la lista
         actual -> next = NULL;
 
-        // Veo en que lista va el nodo y lo inserto
-        if (actual -> count < piv) ll_add_node(smallers, actual);
-        else if (actual -> count == piv) ll_add_node(equals, actual);
-        else ll_add_node(biggers, actual);
+        if (!type) {
+            // Veo en que lista va el nodo y lo inserto
+            if (actual -> count < piv) ll_add_node(smallers, actual);
+            else if (actual -> count == piv) ll_add_node(equals, actual);
+            else ll_add_node(biggers, actual);
+        } else {
+            // Veo en que lista va el nodo y lo inserto
+            if (strcmp(actual -> key, spiv) < 0) ll_add_node(smallers, actual);
+            else if (strcmp(actual -> key, spiv) == 0) ll_add_node(equals, actual);
+            else ll_add_node(biggers, actual);
+        }
+
 
         // Actualizo el nodo actual
         actual = next;
@@ -108,7 +122,7 @@ void ll_append(LinkedList* ll, char* key, int count) {
     Node* node = ll -> head;
     while (node) {
         // Si esta aumento su frecuencia
-        if (strcmp(node -> key, key) == 1) {
+        if (strcmp(node -> key, key) == 0) {
             node -> count = node -> count + count;
          return;
         }
@@ -117,6 +131,8 @@ void ll_append(LinkedList* ll, char* key, int count) {
         node = next;
     }
     // Creo el nodo a insertar
+    //printf("%s No encontrada\n", key);
+
     node = node_init(key, count);
 
     // Funcion que agrega un nodo al final de una lista ligada
@@ -124,7 +140,7 @@ void ll_append(LinkedList* ll, char* key, int count) {
 }
 
 /** Ordena la lista ligada usando quicksort */
-void ll_quicksort(LinkedList* ll)
+void ll_quicksort(LinkedList* ll, int type)
 {
     // La idea es que al hacer partition se dividan los datos en 3 listas:
     // Menores al pivote, iguales al pivote y mayores al pivote.
@@ -145,11 +161,11 @@ void ll_quicksort(LinkedList* ll)
     biggers.tail = NULL;
 
     // Llamo a partition con la lista ligada original y las nuevas listas
-    partition(ll, &smallers, &equals, &biggers);
+    partition(ll, &smallers, &equals, &biggers, type);
 
     // Llamo a quicksort recursivamente
-    ll_quicksort(&smallers);
-    ll_quicksort(&biggers);
+    ll_quicksort(&smallers, type);
+    ll_quicksort(&biggers, type);
 
     // Concateno los nodos de las 3 listas
     if (smallers.tail)

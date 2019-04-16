@@ -10,6 +10,4 @@
 #include "../structs/linked_list.h"
 
 
-//LinkedList* hash_to_ll(hashtable *h);
-
 void* reducer(void* args);

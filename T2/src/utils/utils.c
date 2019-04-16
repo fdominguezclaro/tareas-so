@@ -9,7 +9,6 @@
 #include "map.h"
 #include "reduce.h"
 
-#include "../structs/hashtable.h"
 #include "../structs/linked_list.h"
 
 
@@ -74,13 +73,22 @@ pthread_t init_reducer_thread(LinkedList ** ll_list, int ll_count) {
     pthread_t thread;
     void* args = reducer_args_init(ll_list, ll_count);
     puts("\n--- Creando reducer thread ---");
-    // void* frequency_hash;
     pthread_create(&thread, NULL, reducer, args);
-    // pthread_join(thread, &frequency_hash);
     return thread;
 }
 
 void create_process(int* array, int array_length) {
 
+}
+
+void write_output(LinkedList** ll_list, int ll_count, char* name) {
+    FILE* file;
+    file = fopen (name, "w");
+//    for (int i=0; i<n; i++) {
+//        set_statistics(ll_list[i]);
+//        fprintf(file, "%s,%i,%i,%i,%i,%i\n", processes[i] -> name, processes[i] -> runs, processes[i] -> interruptions,
+//                processes[i] -> turnaround_time, processes[i] -> response_time, processes[i] -> waiting_time);
+//    }
+    fclose (file);
 }
 

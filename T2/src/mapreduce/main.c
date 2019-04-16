@@ -9,9 +9,12 @@
 #include "../utils/utils.h"
 #include "../utils/map.h"
 #include "../utils/reduce.h"
-#include "../structs/hashtable.h"
 
 
+// Seteamos algunas variables globales
+int BUFFER_SIZE = 1024;
+// assumes no word exceeds length of 45
+int WORD_SIZE = 45;
 // Obtenido de https://stackoverflow.com/questions/4217037/catch-ctrl-c-in-c
 static volatile sig_atomic_t keep_running = 1;
 volatile int running_threads;
@@ -60,10 +63,6 @@ int main(int argc, char *argv[]) {
         exit(0);
     }
 
-    // Seteamos algunas variables globales
-    int BUFFER_SIZE = 300;
-    // assumes no word exceeds length of 45
-    int WORD_SIZE = 45;
     int chunk_count = 0;
 
     while (keep_running) {
@@ -80,33 +79,30 @@ int main(int argc, char *argv[]) {
 
         printf("%s opened succesfully\n\n", argv[1]);
 
-        char ch;
+        char* word = malloc(sizeof(char) * WORD_SIZE);
         char** array = create_array(BUFFER_SIZE, WORD_SIZE);
-        int j = 0;
+        // int j = 0;
 
-        while((ch = fgetc(f)) && (ch != EOF) && keep_running) {
-            if(ch == ' ') {
-                array[chunk_count++][j] = '\0';
-                j = 0;
-                continue;
-            } else if(ch == '\n') {
-                continue;
+        while((chunk_count != BUFFER_SIZE)  && (keep_running) && (fscanf(f, "%s", word) == 1)) {
+            // Lowercase
+            for(int i = 0; word[i]; i++){
+                word[i] = tolower(word[i]);
             }
 
-            ch = tolower(ch);
-            array[chunk_count][j++] = ch;
+            strcpy(array[chunk_count], word);
+
+            chunk_count++;
 
             // Si no queda espacio, hago map sobre el chunk y empiezo otro
             if (chunk_count == BUFFER_SIZE - 1) {
                 if (!version) {
                     ll_list = (LinkedList**)realloc(ll_list, sizeof(LinkedList*) * chunk_count);
-                    // hastables_list = (hashtable**)realloc(hastables_list, sizeof(hashtable*) * chunk_count);
                     init_mapper_thread(array, chunk_count);
                 } else {
                     puts("Version fork");
                 }
 
-                j = 0;
+                // j = 0;
                 chunk_count = 0;
             }
         }
@@ -119,9 +115,7 @@ int main(int argc, char *argv[]) {
             puts("Main creating the last thread");
             init_mapper_thread(array, chunk_count);
             // Espero a que terminen todos los threads
-            while (running_threads > 0) {
-                sleep(1);
-            }
+            while (running_threads > 0);
 
             puts("All threads finished!");
 
@@ -131,9 +125,6 @@ int main(int argc, char *argv[]) {
             pthread_join(thread, (void*) &words);
 
             puts("Reducer thread finished!");
-
-            // print result
-            //printf("%d\n", words -> head -> count);
 
             Node* node = words -> head;
             while (node) {

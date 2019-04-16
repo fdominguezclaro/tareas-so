@@ -29,6 +29,6 @@ void ll_destroy(LinkedList* ll);
 void ll_append(LinkedList* ll, char* key, int count);
 
 /** Ordena la lista ligada usando quicksort */
-void ll_quicksort(LinkedList* ll);
+void ll_quicksort(LinkedList* ll, int type);
 
 int ll_get(LinkedList* ll, int position);
