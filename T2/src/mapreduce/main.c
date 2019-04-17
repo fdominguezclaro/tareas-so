@@ -134,7 +134,6 @@ int main(int argc, char *argv[]) {
 
         write_output(words, argv[2], type);
 
-        array_destroy(array, BUFFER_SIZE);
         ll_destroy(words);
         free(ll_list);
 

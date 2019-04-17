@@ -8,12 +8,15 @@
 
 #include "map.h"
 #include "../structs/linked_list.h"
+#include "utils.h"
 
 
 extern volatile int running_threads;
 extern pthread_mutex_t running_mutex;
 extern LinkedList**  volatile ll_list;
 extern volatile int ll_count;
+extern int BUFFER_SIZE;
+
 
 
 void* mapper(void* args) {
@@ -31,6 +34,7 @@ void* mapper(void* args) {
         ll_append(ll, word, 1);
     }
 
+    array_destroy(data -> array, BUFFER_SIZE);
     args_destroy(data);
     free(word);
 
