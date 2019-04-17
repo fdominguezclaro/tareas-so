@@ -32,6 +32,7 @@ void* mapper(void* args) {
     }
 
     args_destroy(data);
+    free(word);
 
     printf("threads: %i, arrays: %i \n", running_threads, ll_count);
 

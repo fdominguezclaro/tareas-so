@@ -26,6 +26,14 @@ char** create_array(int BUFFER_SIZE, int WORD_SIZE) {
     return array;
 }
 
+void array_destroy(char** array, int BUFFER_SIZE) {
+    for(int k = 0; k < BUFFER_SIZE; k++) {
+        free(array[k]);
+    }
+
+    free(array);
+}
+
 void* args_init(char** array, int array_length) {
     Args *args = malloc(sizeof(Args));
     args -> array = array;
@@ -43,7 +51,7 @@ void* reducer_args_init(LinkedList ** array, int ll_count) {
 }
 
 void args_destroy(Args* args) {
-    free(args -> array);
+    //free(args -> array);
     free(args);
 }
 
