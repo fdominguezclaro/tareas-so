@@ -40,6 +40,7 @@ void* reducer(void* args) {
     }
 
     free(data);
+    free(word);
     puts("Sorting words!");
 
     ll_quicksort(joined_ll, 1);
