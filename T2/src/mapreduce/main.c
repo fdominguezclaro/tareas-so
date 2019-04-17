@@ -112,8 +112,8 @@ int main(int argc, char *argv[]) {
         fclose(f);
 
         LinkedList* words = NULL;
-        // Proceso el ultimo chunk
         if (!version) {
+            // Proceso el ultimo chunk
             puts("Main creating the last thread");
             init_mapper_thread(array, chunk_count);
             // Espero a que terminen todos los threads

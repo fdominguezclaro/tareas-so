@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "utils.h"
 #include "map.h"
@@ -91,11 +92,13 @@ void write_output(LinkedList* ll_list, char* name, int type) {
         fprintf(file, "cantidad,palabras\n");
     }
 
-    LinkedList* sames = ll_init();
+    LinkedList* ll_counts = ll_init();
     int counter = 0;
 
     Node* node = ll_list -> head;
     int actual = node -> count;
+    char lenght[12];
+    int size;
 
     while (node) {
         if (type == 1) {
@@ -115,7 +118,10 @@ void write_output(LinkedList* ll_list, char* name, int type) {
                 counter = 1;
             }
 
-        } else {
+        } else if (type == 3) {
+            size = strlen(node -> key);
+            sprintf(lenght, "%d", size);
+            ll_append(ll_counts, lenght, node -> count);
         }
 
         node = node -> next;
@@ -123,7 +129,15 @@ void write_output(LinkedList* ll_list, char* name, int type) {
 
     if (type == 2) {
         fprintf(file, "]\n");
+    } else if (type == 3) {
+        ll_quicksort(ll_counts, 0);
+        node = ll_counts -> head;
+        while (node) {
+            fprintf(file, "%i,%s\n", node -> count, node -> key);
+            node = node -> next;
+        }
     }
+    ll_destroy(ll_counts);
 
     fclose (file);
 }
