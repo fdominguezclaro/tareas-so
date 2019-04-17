@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "reduce.h"
+#include "utils.h"
 #include "../structs/linked_list.h"
 
 
@@ -39,8 +40,9 @@ void* reducer(void* args) {
         ll_destroy(ll_list[k]);
     }
 
-    free(data);
     free(word);
+    reducer_args_destroy(data);
+
     puts("Sorting words!");
 
     ll_quicksort(joined_ll, 1);

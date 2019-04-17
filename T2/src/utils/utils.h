@@ -34,6 +34,8 @@ void* args_init(char** array, int array_length);
 // Inicializa la estructura para pasarle argumentos a un thread o proceso reducer
 void* reducer_args_init(LinkedList ** array, int hashes_count);
 
+void reducer_args_destroy(ReducerArgs* args);
+
 // Destruye array
 void array_destroy(char** array, int BUFFER_SIZE);
 

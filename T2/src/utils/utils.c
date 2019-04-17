@@ -15,6 +15,8 @@
 
 extern volatile int running_threads;
 extern pthread_mutex_t running_mutex;
+extern int BUFFER_SIZE;
+
 
 char** create_array(int BUFFER_SIZE, int WORD_SIZE) {
     char** array = malloc(sizeof(char*) * BUFFER_SIZE);
@@ -51,7 +53,7 @@ void* reducer_args_init(LinkedList ** array, int ll_count) {
 }
 
 void args_destroy(Args* args) {
-    //free(args -> array);
+    array_destroy(args -> array, BUFFER_SIZE);
     free(args);
 }
 

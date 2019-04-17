@@ -34,7 +34,6 @@ void* mapper(void* args) {
         ll_append(ll, word, 1);
     }
 
-    array_destroy(data -> array, BUFFER_SIZE);
     args_destroy(data);
     free(word);
 
