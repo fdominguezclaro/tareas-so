@@ -81,14 +81,50 @@ void create_process(int* array, int array_length) {
 
 }
 
-void write_output(LinkedList** ll_list, int ll_count, char* name) {
+void write_output(LinkedList* ll_list, char* name, int type) {
     FILE* file;
     file = fopen (name, "w");
-//    for (int i=0; i<n; i++) {
-//        set_statistics(ll_list[i]);
-//        fprintf(file, "%s,%i,%i,%i,%i,%i\n", processes[i] -> name, processes[i] -> runs, processes[i] -> interruptions,
-//                processes[i] -> turnaround_time, processes[i] -> response_time, processes[i] -> waiting_time);
-//    }
+
+    if (type <= 2) {
+        fprintf(file, "repeticiones,palabras\n");
+    } else {
+        fprintf(file, "cantidad,palabras\n");
+    }
+
+    LinkedList* sames = ll_init();
+    int counter = 0;
+
+    Node* node = ll_list -> head;
+    int actual = node -> count;
+
+    while (node) {
+        if (type == 1) {
+            fprintf(file, "%i,%s\n", node -> count, node -> key);
+        } else if (type == 2) {
+            if (actual == node -> count) {
+                if (counter == 0) {
+                    fprintf(file, "%i,[%s", node -> count, node -> key);
+                } else {
+                    fprintf(file, ";%s", node -> key);
+                }
+                counter++;
+            } else {
+                fprintf(file, "]\n");
+                fprintf(file, "%i,[%s", node -> count, node -> key);
+                actual = node -> count;
+                counter = 1;
+            }
+
+        } else {
+        }
+
+        node = node -> next;
+    }
+
+    if (type == 2) {
+        fprintf(file, "]\n");
+    }
+
     fclose (file);
 }
 

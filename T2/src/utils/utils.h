@@ -49,4 +49,4 @@ pthread_t init_reducer_thread(LinkedList ** hastables_list, int hashes_count);
 // Crea un proceso
 void create_process(int* array, int array_length);
 
-void write_output(LinkedList** ll_list, int ll_count, char* name);
+void write_output(LinkedList* ll_list, char* name, int type);

@@ -98,6 +98,7 @@ int main(int argc, char *argv[]) {
                 if (!version) {
                     ll_list = (LinkedList**)realloc(ll_list, sizeof(LinkedList*) * chunk_count);
                     init_mapper_thread(array, chunk_count);
+                    array = create_array(BUFFER_SIZE, WORD_SIZE);
                 } else {
                     puts("Version fork");
                 }
@@ -110,6 +111,7 @@ int main(int argc, char *argv[]) {
         // Cerrar archivo
         fclose(f);
 
+        LinkedList* words = NULL;
         // Proceso el ultimo chunk
         if (!version) {
             puts("Main creating the last thread");
@@ -121,21 +123,15 @@ int main(int argc, char *argv[]) {
 
             // Creo un reducer_thread
             pthread_t thread = init_reducer_thread(ll_list, ll_count);
-            LinkedList* words;
             pthread_join(thread, (void*) &words);
 
             puts("Reducer thread finished!");
 
-            Node* node = words -> head;
-            while (node) {
-                printf("%s %d\n", node -> key, node -> count);
-                Node* next = node -> next;
-                node = next;
-            }
-
-            ll_destroy(words);
         } else {
         }
+
+        write_output(words, argv[2], type);
+        ll_destroy(words);
 
         return 0;
 
