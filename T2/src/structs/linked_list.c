@@ -85,7 +85,6 @@ static void partition(LinkedList* ll, LinkedList* smallers, LinkedList* equals, 
             else ll_add_node(biggers, actual);
         }
 
-
         // Actualizo el nodo actual
         actual = next;
     }

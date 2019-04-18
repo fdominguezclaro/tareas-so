@@ -12,7 +12,6 @@
 #include "../structs/linked_list.h"
 
 
-extern volatile int running_threads;
 extern LinkedList** volatile ll_list;
 extern volatile int ll_count;
 

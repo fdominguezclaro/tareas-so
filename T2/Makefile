@@ -36,9 +36,9 @@ CFLAGS=-Wunused -Wall $(OPT)
 # Matemáticas (C Math library)
 MTH=
 # Uso de threads
-THR =-lpthread
+THR=
 
-LIB=$(THR)
+LIB=
 
 ###############################################################################
 # MÓDULOS Y PROGRAMAS                                                         #

@@ -13,7 +13,7 @@
 #include "../structs/linked_list.h"
 
 
-extern volatile int running_threads;
+extern volatile int running;
 extern pthread_mutex_t running_mutex;
 extern int BUFFER_SIZE;
 
@@ -74,7 +74,7 @@ pthread_t init_mapper_thread(char** array, int array_length) {
     void* args = args_init(array, array_length);
     // Sumo el thread al ounter
     pthread_mutex_lock(&running_mutex);
-    running_threads++;
+    running++;
     pthread_mutex_unlock(&running_mutex);
     pthread_create(&thread, NULL, mapper, args);
     return thread;
@@ -151,4 +151,3 @@ void write_output(LinkedList* ll_list, char* name, int type) {
 
     fclose (file);
 }
-

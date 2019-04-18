@@ -15,15 +15,15 @@
 int BUFFER_SIZE = 1024;
 // assumes no word exceeds length of 45
 int WORD_SIZE = 45;
-// Obtenido de https://stackoverflow.com/questions/4217037/catch-ctrl-c-in-c
-static volatile sig_atomic_t keep_running = 1;
-volatile int running_threads;
+
+volatile int running;
 pthread_mutex_t running_mutex = PTHREAD_MUTEX_INITIALIZER;
-// hashtable ** volatile hastables_list;
-// volatile int hashes_count;
 LinkedList**  volatile ll_list;
 volatile int ll_count;
 
+
+// Obtenido de https://stackoverflow.com/questions/4217037/catch-ctrl-c-in-c
+static volatile sig_atomic_t keep_running = 1;
 static void sig_handler(int _) {
     (void)_;
     keep_running = 0;
@@ -51,15 +51,15 @@ int main(int argc, char *argv[]) {
         puts("Version thread");
         version = 0;
         // Llevo la cuenta de los threads creados
-        running_threads = 0;
-        // Lista de hastables
+        running = 0;
+        // Lista de listas ligadas
         ll_list = malloc(sizeof(LinkedList *) * 1);
 
     } else if (strcmp(argv[3], "fork") == 0) {
         puts("Version fork");
         version = 1;
     } else {
-        puts("Tipo de simulacion incorrecto! Puede ser threads o fork");
+        puts("Tipo de simulacion incorrecto! Debe ser threads o fork");
         exit(0);
     }
 
@@ -81,7 +81,6 @@ int main(int argc, char *argv[]) {
 
         char* word = malloc(sizeof(char) * WORD_SIZE);
         char** array = create_array(BUFFER_SIZE, WORD_SIZE);
-        // int j = 0;
 
         while((chunk_count != BUFFER_SIZE)  && (keep_running) && (fscanf(f, "%s", word) == 1)) {
             // Lowercase
@@ -103,7 +102,6 @@ int main(int argc, char *argv[]) {
                     puts("Version fork");
                 }
 
-                // j = 0;
                 chunk_count = 0;
             }
         }
@@ -119,7 +117,7 @@ int main(int argc, char *argv[]) {
             puts("Main creating the last thread");
             init_mapper_thread(array, chunk_count);
             // Espero a que terminen todos los threads
-            while (running_threads > 0);
+            while (running > 0);
 
             puts("All threads finished!");
 

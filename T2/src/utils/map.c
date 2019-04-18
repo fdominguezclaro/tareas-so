@@ -11,12 +11,11 @@
 #include "utils.h"
 
 
-extern volatile int running_threads;
+extern volatile int running;
 extern pthread_mutex_t running_mutex;
 extern LinkedList**  volatile ll_list;
 extern volatile int ll_count;
 extern int BUFFER_SIZE;
-
 
 
 void* mapper(void* args) {
@@ -37,13 +36,13 @@ void* mapper(void* args) {
     args_destroy(data);
     free(word);
 
-    printf("threads: %i, arrays: %i \n", running_threads, ll_count);
+    printf("threads: %i, arrays: %i \n", running, ll_count);
 
     // Elimino el thread del contador usando lock y guardo su hastable
     pthread_mutex_lock(&running_mutex);
     ll_list[ll_count] = ll;
     ll_count++;
-    running_threads--;
+    running--;
     pthread_mutex_unlock(&running_mutex);
 
     puts("I'm done!");
