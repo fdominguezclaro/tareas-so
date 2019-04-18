@@ -47,5 +47,6 @@ void* mapper(void* args) {
     pthread_mutex_unlock(&running_mutex);
 
     puts("I'm done!");
+    pthread_detach(pthread_self());
     pthread_exit (NULL);
 }
