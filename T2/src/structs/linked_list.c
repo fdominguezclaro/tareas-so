@@ -100,6 +100,7 @@ LinkedList* ll_init() {
     // Pongo sus punteros en nulo y su contador en 0
     ll -> head = NULL;
     ll -> tail = NULL;
+    ll -> size = 0;
 
     // Retorno la lista ligada
     return ll;
@@ -136,6 +137,8 @@ void ll_append(LinkedList* ll, char* key, int count) {
 
     // Funcion que agrega un nodo al final de una lista ligada
     ll_add_node(ll, node);
+
+    ll -> size = ll -> size + 1;
 }
 
 /** Ordena la lista ligada usando quicksort */

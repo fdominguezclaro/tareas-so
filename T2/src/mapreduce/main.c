@@ -4,6 +4,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/wait.h>
 
 
 #include "../utils/utils.h"
@@ -17,9 +20,20 @@ int BUFFER_SIZE = 1024;
 int WORD_SIZE = 45;
 
 volatile int running;
+volatile int version = 0;
+int type;
+
+// Para threads
 pthread_mutex_t running_mutex = PTHREAD_MUTEX_INITIALIZER;
 LinkedList**  volatile ll_list;
 volatile int ll_count;
+
+// Para procesos
+void *shared_memory;
+int mem_id = 1;
+void** shm_data;
+void* args;
+pid_t pid;
 
 
 // Obtenido de https://stackoverflow.com/questions/4217037/catch-ctrl-c-in-c
@@ -34,19 +48,16 @@ int main(int argc, char *argv[]) {
     puts("----- T2 SO FDOM -----\n");
 
     // Manejamos los parametros del programa
-    // Definimos el type
-    int type;
     if (argc == 5) {
         sscanf(argv[4], "%i", &type);
     } else if (argc == 4) {
         type = 1;
-    } else if (argc < 4 || argc > 4){
+    } else if (argc < 4 || argc > 4) {
         puts("Cantidad de argumentos incorrectos!");
         exit(0);
     }
 
     // Tipo de la simulacion
-    int version = 0;
     if (strcmp(argv[3], "threads") == 0) {
         puts("Version thread");
         version = 0;
@@ -58,6 +69,8 @@ int main(int argc, char *argv[]) {
     } else if (strcmp(argv[3], "fork") == 0) {
         puts("Version fork");
         version = 1;
+
+        shm_data = malloc(sizeof(void *) * 1);
     } else {
         puts("Tipo de simulacion incorrecto! Debe ser threads o fork");
         exit(0);
@@ -99,7 +112,24 @@ int main(int argc, char *argv[]) {
                     init_mapper_thread(array, chunk_count);
                     array = create_array(BUFFER_SIZE, WORD_SIZE);
                 } else {
-                    puts("Version fork");
+                    shm_data = (void **)realloc(shm_data, sizeof(void *) * 1);
+                    // Creo la memoria compartida
+                    key_t key = ftok("keys/v1", mem_id);
+                    mem_id++;
+                    int shmid = shmget(key, sizeof(int) + sizeof(int) * BUFFER_SIZE + sizeof(char) * WORD_SIZE * BUFFER_SIZE + sizeof(int) * BUFFER_SIZE, IPC_CREAT | SHM_W | SHM_R);
+                    shared_memory = shmat(shmid, NULL, 0);
+                    shm_data[running] = shared_memory;
+                    running++;
+
+                    if ((pid = fork()) == 0) {
+                        args = args_init(array, chunk_count, shared_memory);
+                        mapper(args);
+                        free(word);
+                        free(shm_data);
+                        fclose(f);
+                        shmctl(shmid, IPC_RMID, NULL);
+                        exit(0);
+                    }
                 }
 
                 chunk_count = 0;
@@ -130,10 +160,28 @@ int main(int argc, char *argv[]) {
         } else {
         }
 
-        write_output(words, argv[2], type);
+        if (!version) {
+            write_output(words, argv[2], type);
+            free(ll_list);
+            ll_destroy(words);
+        } else {
+            // Creo la memoria compartida
+            key_t key = ftok("keys/v1", mem_id);
+            mem_id++;
+            int shmid = shmget(key, sizeof(int) + sizeof(int) * BUFFER_SIZE + sizeof(char) * WORD_SIZE * BUFFER_SIZE + sizeof(int) * BUFFER_SIZE, IPC_CREAT | SHM_W | SHM_R);
+            shared_memory = shmat(shmid, NULL, 0);
+            shm_data[running] = shared_memory;
+            running++;
 
-        ll_destroy(words);
-        free(ll_list);
+            if ((pid = fork()) == 0) {
+                args = args_init(array, chunk_count, shared_memory);
+                mapper(args);
+                free(shm_data);
+                fclose(f);
+                // shmctl(shmid, IPC_RMID, NULL);
+                exit(0);
+            }
+        }
 
         return 0;
 

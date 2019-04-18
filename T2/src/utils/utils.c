@@ -36,7 +36,7 @@ void array_destroy(char** array, int BUFFER_SIZE) {
     free(array);
 }
 
-void* args_init(char** array, int array_length) {
+void* args_init(char** array, int array_length, void** shm_data) {
     Args *args = malloc(sizeof(Args));
     args -> array = array;
     args -> array_length = array_length;
@@ -71,7 +71,7 @@ void print_array(char** array, int array_length) {
 pthread_t init_mapper_thread(char** array, int array_length) {
     pthread_t thread;
     puts("\n--- Creando mapper thread ---");
-    void* args = args_init(array, array_length);
+    void* args = args_init(array, array_length, (void **) NULL);
     // Sumo el thread al ounter
     pthread_mutex_lock(&running_mutex);
     running++;

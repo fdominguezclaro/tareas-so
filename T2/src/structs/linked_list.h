@@ -15,6 +15,7 @@ typedef struct linked_list {
     Node* head;
     /** Nodo final de la lista */
     Node* tail;
+    int size;
 } LinkedList;
 
 /////// Funciones publicas de la lista ////////

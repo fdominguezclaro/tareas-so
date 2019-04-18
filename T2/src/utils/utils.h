@@ -11,13 +11,13 @@
 
 #include <pthread.h>
 
-#include "../structs/hashtable.h"
 #include "../structs/linked_list.h"
 
 
 typedef struct arg_struct {
     char** array;
     int array_length;
+    void** shm_data;
 } Args;
 
 typedef struct reducer_arg_struct {
@@ -29,7 +29,7 @@ typedef struct reducer_arg_struct {
 char** create_array(int BUFFER_SIZE, int WORD_SIZE);
 
 // Inicializa la estructura para pasarle argumentos a un thread o proceso mapper
-void* args_init(char** array, int array_length);
+void* args_init(char** array, int array_length, void ** shm_data);
 
 // Inicializa la estructura para pasarle argumentos a un thread o proceso reducer
 void* reducer_args_init(LinkedList ** array, int hashes_count);

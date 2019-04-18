@@ -14,6 +14,7 @@
 
 extern LinkedList** volatile ll_list;
 extern volatile int ll_count;
+extern volatile int type;
 
 
 void* reducer(void* args) {
