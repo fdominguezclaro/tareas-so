@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <pthread.h>
+
 
 #include "reduce.h"
 #include "utils.h"

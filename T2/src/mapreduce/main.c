@@ -8,6 +8,7 @@
 #include <sys/shm.h>
 #include <sys/wait.h>
 #include <time.h>
+#include <pthread.h>
 
 
 #include "../utils/utils.h"

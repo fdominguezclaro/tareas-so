@@ -9,6 +9,8 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/wait.h>
+#include <pthread.h>
+
 
 #include "utils.h"
 #include "map.h"
