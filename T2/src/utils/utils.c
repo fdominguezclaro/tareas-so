@@ -101,7 +101,9 @@ void write_output(LinkedList* ll_list, char* name, int type) {
     FILE* file;
     file = fopen (name, "w");
 
-    if (type <= 2) {
+    if (type == 1) {
+        fprintf(file, "repeticiones,palabra\n");
+    } else if (type == 2) {
         fprintf(file, "repeticiones,palabras\n");
     } else {
         fprintf(file, "cantidad,palabras\n");
@@ -165,11 +167,12 @@ LinkedList** shm_to_ll(LinkedList** ll_list, void ** shared_data, int* shm_ids, 
     char* string;
     int* count;
     for (int i = 0; i < running; i++) {
-        printf("%p\n", index);
+        // printf("%p\n", index);
         void* index = shared_data[i];
         int* size = (int*) index;
+        puts("AQUI FALLO...");
         index = index + sizeof(int);
-        printf("%i", *size);
+        // printf("%i", *size);
         puts("Converting inside fuction");
         for (int j = 0; j < *size; j++) {
             word_size = (int*) index;

@@ -16,7 +16,7 @@
 
 
 // Seteamos algunas variables globales
-int BUFFER_SIZE = 2000;
+int BUFFER_SIZE = 4000;
 // assumes no word exceeds length of 45
 int WORD_SIZE = 45;
 
@@ -132,8 +132,6 @@ int main(int argc, char *argv[]) {
                     if ((pid = fork()) == 0) {
                         args = args_init(array, chunk_count, shared_memory);
                         mapper(args);
-                        int* s = (int *) shared_memory;
-                        printf("%p | %i\n", shared_memory, *s);
                         free(word);
                         free(shm_data);
                         fclose(f);
@@ -158,10 +156,11 @@ int main(int argc, char *argv[]) {
             // Espero a que terminen todos los threads
             while (running > 0);
 
-            puts("All threads finished!");
+            puts("\n --- All mapper threads finished! --- \n");
 
             // Creo un reducer_thread
 
+            // DEBUGGER: Imprimo lista
             // Node* node = ll_list[0] -> head;
             // while (node) {
             //     printf("%i,%s", node -> count, node -> key);
@@ -171,7 +170,7 @@ int main(int argc, char *argv[]) {
             pthread_t thread = init_reducer_thread(ll_list, ll_count);
             pthread_join(thread, (void*) &words);
 
-            puts("Reducer thread finished!");
+            puts("-- Reducer thread finished! ---\n");
 
         } else {
             // Proceso el ultimo chunk
@@ -185,7 +184,7 @@ int main(int argc, char *argv[]) {
             if (running == 0) running++;
 
             if ((pid = fork()) == 0) {
-                puts("child reading chunk");
+                puts("Child process reading chunk");
                 args = args_init(array, chunk_count, shared_memory);
                 mapper(args);
                 free(word);
@@ -196,6 +195,7 @@ int main(int argc, char *argv[]) {
 
             // Espero que terminen los procesos
             while ((wpid = wait(&status)) > 0);
+            puts("\n --- All mapper processes finished! --- \n");
 
             printf("Converting, %i threads run\n", running);
 
@@ -203,30 +203,40 @@ int main(int argc, char *argv[]) {
             LinkedList** ll_list = malloc(sizeof(LinkedList *) * running);
             ll_list = shm_to_ll(ll_list, shm_data, shm_ids, running);
 
+            // DEBUGGER: Imprimo lista
             // Node* node = ll_list[0] -> head;
             // while (node) {
             //     printf("%i,%s", node -> count, node -> key);
             //     node = node -> next;
             // }
 
-
             puts("Sending to reducer");
-            void* args = reducer_args_init(ll_list, ll_count);
-            words = (LinkedList *)reducer(args);
+            if ((pid = fork()) == 0) {
+                puts("Child process reducing!");
+                void* args = reducer_args_init(ll_list, ll_count);
+                words = (LinkedList *)reducer(args);
+
+                ll_destroy(words);
+                free(ll_list);
+                exit(0);
+
+            }
+
+            // Ahora leo las memorias compartidas y paso los datos a una lista ligada
+            // No implementado dado que se cae antes de llegar... Pero el proceso es muy similar lo que hace shm_to_ll
+
+            // Espero que termine el proceso reducer
+            while ((wpid = wait(&status)) > 0);
+            puts("--- Reducer process finished! ---");
+
             // Libero las memorias compartidas
             for (int i = 0; i < running; i++) {
                 shmctl(shm_ids[i], IPC_RMID, NULL);
             }
 
-            // Ahora leo las memorias compartidas y paso los datos a una lista ligada
-
-            // Espero que termine el procesos
-            while ((wpid = wait(&status)) > 0);
-
-
         }
 
-        puts("All childs finished");
+        puts("All childs finished\n");
         write_output(words, argv[2], type);
         ll_destroy(words);
         free(ll_list);

@@ -22,7 +22,7 @@ void* reducer(void* args) {
     LinkedList* joined_ll = ll_init();
 
     ReducerArgs* data = args;
-    puts("I'm a reducer thread, merging all ll's!");
+    puts("I'm a reducer worker, merging all ll's!");
 
     char* word = malloc(sizeof(char) * 45);
     // transfer data to joined_ll and free ll
