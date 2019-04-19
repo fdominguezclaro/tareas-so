@@ -5,6 +5,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/wait.h>
 
 #include "utils.h"
 #include "map.h"
@@ -93,6 +97,7 @@ void create_process(int* array, int array_length) {
 }
 
 void write_output(LinkedList* ll_list, char* name, int type) {
+    puts("writing output!");
     FILE* file;
     file = fopen (name, "w");
 
@@ -107,6 +112,7 @@ void write_output(LinkedList* ll_list, char* name, int type) {
 
     Node* node = ll_list -> head;
     int actual = node -> count;
+    // puts("DEBUGGER");
     char lenght[12];
     int size;
 
@@ -150,4 +156,33 @@ void write_output(LinkedList* ll_list, char* name, int type) {
     ll_destroy(ll_counts);
 
     fclose (file);
+}
+
+LinkedList** shm_to_ll(LinkedList** ll_list, void ** shared_data, int* shm_ids, int running) {
+    // Recorro cada lista y copio la informacion
+    LinkedList* shm_chunk = ll_init();
+    int* word_size;
+    char* string;
+    int* count;
+    for (int i = 0; i < running; i++) {
+        printf("%p\n", index);
+        void* index = shared_data[i];
+        int* size = (int*) index;
+        index = index + sizeof(int);
+        printf("%i", *size);
+        puts("Converting inside fuction");
+        for (int j = 0; j < *size; j++) {
+            word_size = (int*) index;
+            string = malloc(sizeof(char) * (*word_size + 1));
+            strcpy(string, (char*) (index + sizeof(int)));
+            count = (int*) (index + sizeof(int) + sizeof(char) * (*word_size + 1));
+            index = (index + sizeof(int) + sizeof(char) * (*word_size + 1) + sizeof(int));
+            ll_append(shm_chunk, string, *count);
+        }
+        ll_list[i] = shm_chunk;
+
+        shmctl(shm_ids[i], IPC_RMID, NULL);
+    }
+
+    return ll_list;
 }

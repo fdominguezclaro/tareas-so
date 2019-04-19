@@ -54,4 +54,9 @@ pthread_t init_reducer_thread(LinkedList ** hastables_list, int hashes_count);
 // Crea un proceso
 void create_process(int* array, int array_length);
 
+// Escribe los archivos segun el tipo pedido
 void write_output(LinkedList* ll_list, char* name, int type);
+
+// Pasa todas las regiones compartidas a una lista ligada que contiene listas
+// ligadas con los chunks correspondientes
+LinkedList** shm_to_ll(LinkedList** ll_list, void ** shared_data, int* shm_ids, int running);

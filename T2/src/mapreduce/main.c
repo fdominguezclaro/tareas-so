@@ -7,6 +7,7 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/wait.h>
+#include <time.h>
 
 
 #include "../utils/utils.h"
@@ -15,7 +16,7 @@
 
 
 // Seteamos algunas variables globales
-int BUFFER_SIZE = 1024;
+int BUFFER_SIZE = 2000;
 // assumes no word exceeds length of 45
 int WORD_SIZE = 45;
 
@@ -30,10 +31,12 @@ volatile int ll_count;
 
 // Para procesos
 void *shared_memory;
+int* shm_ids;
 int mem_id = 1;
 void** shm_data;
 void* args;
-pid_t pid;
+pid_t pid, wpid;
+int status = 0;
 
 
 // Obtenido de https://stackoverflow.com/questions/4217037/catch-ctrl-c-in-c
@@ -44,6 +47,8 @@ static void sig_handler(int _) {
 }
 
 int main(int argc, char *argv[]) {
+    clock_t t;
+    t = clock();
     signal(SIGINT, sig_handler);
     puts("----- T2 SO FDOM -----\n");
 
@@ -71,6 +76,7 @@ int main(int argc, char *argv[]) {
         version = 1;
 
         shm_data = malloc(sizeof(void *) * 1);
+        shm_ids = malloc(sizeof(void *) * 1);
     } else {
         puts("Tipo de simulacion incorrecto! Debe ser threads o fork");
         exit(0);
@@ -113,23 +119,28 @@ int main(int argc, char *argv[]) {
                     array = create_array(BUFFER_SIZE, WORD_SIZE);
                 } else {
                     shm_data = (void **)realloc(shm_data, sizeof(void *) * 1);
+                    shm_ids = (int *)realloc(shm_data, sizeof(void *) * 1);
                     // Creo la memoria compartida
                     key_t key = ftok("keys/v1", mem_id);
                     mem_id++;
                     int shmid = shmget(key, sizeof(int) + sizeof(int) * BUFFER_SIZE + sizeof(char) * WORD_SIZE * BUFFER_SIZE + sizeof(int) * BUFFER_SIZE, IPC_CREAT | SHM_W | SHM_R);
                     shared_memory = shmat(shmid, NULL, 0);
                     shm_data[running] = shared_memory;
+                    shm_ids[running] = shmid;
                     running++;
 
                     if ((pid = fork()) == 0) {
                         args = args_init(array, chunk_count, shared_memory);
                         mapper(args);
+                        int* s = (int *) shared_memory;
+                        printf("%p | %i\n", shared_memory, *s);
                         free(word);
                         free(shm_data);
                         fclose(f);
-                        shmctl(shmid, IPC_RMID, NULL);
+                        array = create_array(BUFFER_SIZE, WORD_SIZE);
                         exit(0);
                     }
+                    array = create_array(BUFFER_SIZE, WORD_SIZE);
                 }
 
                 chunk_count = 0;
@@ -137,8 +148,6 @@ int main(int argc, char *argv[]) {
         }
 
         free(word);
-
-        // Cerrar archivo
         fclose(f);
 
         LinkedList* words = NULL;
@@ -152,36 +161,85 @@ int main(int argc, char *argv[]) {
             puts("All threads finished!");
 
             // Creo un reducer_thread
+
+            // Node* node = ll_list[0] -> head;
+            // while (node) {
+            //     printf("%i,%s", node -> count, node -> key);
+            //     node = node -> next;
+            // }
+
             pthread_t thread = init_reducer_thread(ll_list, ll_count);
             pthread_join(thread, (void*) &words);
 
             puts("Reducer thread finished!");
 
         } else {
-        }
-
-        if (!version) {
-            write_output(words, argv[2], type);
-            free(ll_list);
-            ll_destroy(words);
-        } else {
-            // Creo la memoria compartida
+            // Proceso el ultimo chunk
             key_t key = ftok("keys/v1", mem_id);
             mem_id++;
             int shmid = shmget(key, sizeof(int) + sizeof(int) * BUFFER_SIZE + sizeof(char) * WORD_SIZE * BUFFER_SIZE + sizeof(int) * BUFFER_SIZE, IPC_CREAT | SHM_W | SHM_R);
             shared_memory = shmat(shmid, NULL, 0);
             shm_data[running] = shared_memory;
-            running++;
+            shm_ids[running] = shmid;
+
+            if (running == 0) running++;
 
             if ((pid = fork()) == 0) {
+                puts("child reading chunk");
                 args = args_init(array, chunk_count, shared_memory);
                 mapper(args);
+                free(word);
                 free(shm_data);
                 fclose(f);
-                // shmctl(shmid, IPC_RMID, NULL);
                 exit(0);
             }
+
+            // Espero que terminen los procesos
+            while ((wpid = wait(&status)) > 0);
+
+            printf("Converting, %i threads run\n", running);
+
+            // Convertimos las shared memories en una lista ligada para pasarsela al reduce
+            LinkedList** ll_list = malloc(sizeof(LinkedList *) * running);
+            ll_list = shm_to_ll(ll_list, shm_data, shm_ids, running);
+
+            // Node* node = ll_list[0] -> head;
+            // while (node) {
+            //     printf("%i,%s", node -> count, node -> key);
+            //     node = node -> next;
+            // }
+
+
+            puts("Sending to reducer");
+            void* args = reducer_args_init(ll_list, ll_count);
+            words = (LinkedList *)reducer(args);
+            // Libero las memorias compartidas
+            for (int i = 0; i < running; i++) {
+                shmctl(shm_ids[i], IPC_RMID, NULL);
+            }
+
+            // Ahora leo las memorias compartidas y paso los datos a una lista ligada
+
+            // Espero que termine el procesos
+            while ((wpid = wait(&status)) > 0);
+
+
         }
+
+        puts("All childs finished");
+        write_output(words, argv[2], type);
+        ll_destroy(words);
+        free(ll_list);
+
+        if (!version) {
+        } else {
+        }
+
+        t = clock() - t;
+        double time = ((double)t)/CLOCKS_PER_SEC;
+
+        // Imprimimos el tiempo
+        printf("%f,", time);
 
         return 0;
 

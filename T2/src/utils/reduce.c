@@ -14,7 +14,8 @@
 
 extern LinkedList** volatile ll_list;
 extern volatile int ll_count;
-extern volatile int type;
+extern volatile int version;
+extern void *shared_memory;
 
 
 void* reducer(void* args) {
@@ -49,5 +50,11 @@ void* reducer(void* args) {
     ll_quicksort(joined_ll, 0);
 
     puts("I'm done!");
+
+    if (!version) {
     pthread_exit(joined_ll);
+    } else {
+        return joined_ll;
+    }
+
 }
